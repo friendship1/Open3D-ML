@@ -161,7 +161,7 @@ class SemsegAugmentation(Augmentation):
         # Raise warnings for misspelled/unimplemented methods.
         all_methods = [
             'recenter', 'normalize', 'rotate', 'scale', 'noise',
-            'RandomDropout', 'RandomHorizontalFlip', 'ChromaticAutoContrast',
+            'RandomDropout', 'RandomDropout2', 'RandomHorizontalFlip', 'ChromaticAutoContrast',
             'ChromaticTranslation', 'ChromaticJitter',
             'HueSaturationTranslation'
         ]
@@ -189,6 +189,29 @@ class SemsegAugmentation(Augmentation):
             inds = self.rng.choice(N,
                                    int(N * (1 - dropout_ratio)),
                                    replace=False)
+            return pc[inds], feats[inds], labels[inds]
+        return pc, feats, labels
+
+    def RandomDropout2(self, pc, feats, labels, cfg):
+        """Randomly drops some points.
+
+        Args:
+            pc: Pointcloud.
+            feats: Features.
+            labels: Labels.
+            cfg: configuration dict.
+        """
+        dropout_start_ratio = cfg.get('dropout_start_ratio', 0.5)
+        low = cfg.get('dropout_ratio_low', 0.5)
+        high = cfg.get('dropout_ratio_high', 0.9)
+        if self.rng.random() < dropout_start_ratio:
+            dropout_ratio = self.rng.uniform(low, high)
+            N = len(pc)
+            inds = self.rng.choice(N,
+                                   int(N * (1 - dropout_ratio)),
+                                   replace=False)
+            if feats is None:
+                return pc[inds], feats, labels[inds]
             return pc[inds], feats[inds], labels[inds]
         return pc, feats, labels
 
@@ -384,6 +407,10 @@ class SemsegAugmentation(Augmentation):
         if 'RandomDropout' in cfg:
             point, feat, labels = self.RandomDropout(point, feat, labels,
                                                      cfg['RandomDropout'])
+                                                    
+        if 'RandomDropout2' in cfg:
+            point, feat, labels = self.RandomDropout2(point, feat, labels,
+                                                     cfg['RandomDropout2'])
 
         if 'RandomHorizontalFlip' in cfg:
             point = self.RandomHorizontalFlip(point,
