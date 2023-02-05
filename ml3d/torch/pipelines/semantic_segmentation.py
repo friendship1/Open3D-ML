@@ -262,6 +262,89 @@ class SemanticSegmentation(BasePipeline):
         )
 
         log.info("Finished testing")
+    
+    def run_validation(self):
+        """Run the test (on validation set) using the data passed."""
+        model = self.model
+        dataset = self.dataset
+        device = self.device
+        cfg = self.cfg
+        model.device = device
+        model.to(device)
+        model.eval()
+        self.metric_val = SemSegMetric()
+
+        timestamp = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+
+        log.info("DEVICE : {}".format(device))
+        log_file_path = join(cfg.logs_dir, 'log_val_' + timestamp + '.txt')
+        log.info("Logging in file : {}".format(log_file_path))
+        log.addHandler(logging.FileHandler(log_file_path))
+
+        batcher = self.get_batcher(device)
+
+        val_dataset = dataset.get_split('validation')
+        val_sampler = val_dataset.sampler
+        val_split = TorchDataloader(dataset=val_dataset,
+                                     preprocess=model.preprocess,
+                                     transform=model.transform,
+                                     sampler=val_sampler,
+                                     use_cache=dataset.cfg.use_cache)
+        val_loader = DataLoader(val_split,
+                                 batch_size=cfg.val_batch_size,
+                                 sampler=get_sampler(val_sampler),
+                                 collate_fn=batcher.collate_fn)
+
+        self.dataset_split = val_dataset
+
+        self.load_ckpt(model.cfg.ckpt_path)
+
+        model.trans_point_sampler = val_sampler.get_point_sampler()
+        self.curr_cloud_id = -1
+        self.test_probs = []
+        self.test_labels = []
+        self.ori_test_probs = []
+        self.ori_test_labels = []
+
+        record_summary = cfg.get('summary').get('record_for', [])
+        log.info("Started testing on validation")
+
+        with torch.no_grad():
+            for unused_step, inputs in enumerate(val_loader):
+                if hasattr(inputs['data'], 'to'):
+                    inputs['data'].to(device)
+                results = model(inputs['data'])
+                self.update_tests(val_sampler, inputs, results)
+
+                if self.complete_infer:
+                    inference_result = {
+                        'predict_labels': self.ori_test_labels.pop(),
+                        'predict_scores': self.ori_test_probs.pop()
+                    }
+                    attr = self.dataset_split.get_attr(val_sampler.cloud_id)
+                    gt_labels = self.dataset_split.get_data(
+                        val_sampler.cloud_id)['label']
+                    if (gt_labels > 0).any():
+                        valid_scores, valid_labels = filter_valid_label(
+                            torch.tensor(
+                                inference_result['predict_scores']).to(device),
+                            torch.tensor(gt_labels).to(device),
+                            model.cfg.num_classes, model.cfg.ignored_label_inds,
+                            device)
+
+                        self.metric_val.update(valid_scores, valid_labels)
+                        log.info(f"Accuracy : {self.metric_val.acc()}")
+                        log.info(f"IoU : {self.metric_val.iou()}")
+                    dataset.save_test_result(inference_result, attr)
+                    # Save only for the first batch
+                    if 'valid' in record_summary and 'valid' not in self.summary:
+                        self.summary['valid'] = self.get_3d_summary(
+                            results, inputs['data'], 0, save_gt=False)
+        log.info(
+            f"Overall Testing Accuracy : {self.metric_val.acc()[-1]}, mIoU : {self.metric_val.iou()[-1]}"
+        )
+
+        log.info("Finished testing")
 
     def update_tests(self, sampler, inputs, results):
         """Update tests using sampler, inputs, and results."""
@@ -460,6 +543,139 @@ class SemanticSegmentation(BasePipeline):
 
             if epoch % cfg.save_ckpt_freq == 0 or epoch == cfg.max_epoch:
                 self.save_ckpt(epoch)
+    
+    def run_validation2(self):
+        torch.manual_seed(self.rng.integers(np.iinfo(
+            np.int32).max))  # Random reproducible seed for torch
+        model = self.model
+        device = self.device
+        model.device = device
+        dataset = self.dataset
+
+        cfg = self.cfg
+        model.to(device)
+
+        # log.info("DEVICE : {}".format(device))
+        # timestamp = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+
+        # log_file_path = join(cfg.logs_dir, 'log_train_' + timestamp + '.txt')
+        # log.info("Logging in file : {}".format(log_file_path))
+        # log.addHandler(logging.FileHandler(log_file_path))
+
+        Loss = SemSegLoss(self, model, dataset, device)
+        # self.metric_train = SemSegMetric()
+        self.metric_val = SemSegMetric()
+
+        self.batcher = self.get_batcher(device)
+
+        # train_dataset = dataset.get_split('train')
+        # train_sampler = train_dataset.sampler
+        # train_split = TorchDataloader(dataset=train_dataset,
+        #                               preprocess=model.preprocess,
+        #                               transform=model.transform,
+        #                               sampler=train_sampler,
+        #                               use_cache=dataset.cfg.use_cache,
+        #                               steps_per_epoch=dataset.cfg.get(
+        #                                   'steps_per_epoch_train', None))
+
+        # train_loader = DataLoader(
+        #     train_split,
+        #     batch_size=cfg.batch_size,
+        #     sampler=get_sampler(train_sampler),
+        #     num_workers=cfg.get('num_workers', 2),
+        #     pin_memory=cfg.get('pin_memory', True),
+        #     collate_fn=self.batcher.collate_fn,
+        #     worker_init_fn=lambda x: np.random.seed(x + np.uint32(
+        #         torch.utils.data.get_worker_info().seed))
+        # )  # numpy expects np.uint32, whereas torch returns np.uint64.
+
+        valid_dataset = dataset.get_split('validation')
+        valid_sampler = valid_dataset.sampler
+        valid_split = TorchDataloader(dataset=valid_dataset,
+                                      preprocess=model.preprocess,
+                                      transform=model.transform,
+                                      sampler=valid_sampler,
+                                      use_cache=dataset.cfg.use_cache,
+                                      steps_per_epoch=dataset.cfg.get(
+                                          'steps_per_epoch_valid', None))
+
+        valid_loader = DataLoader(
+            valid_split,
+            batch_size=cfg.val_batch_size,
+            sampler=get_sampler(valid_sampler),
+            num_workers=cfg.get('num_workers', 2),
+            pin_memory=cfg.get('pin_memory', True),
+            collate_fn=self.batcher.collate_fn,
+            worker_init_fn=lambda x: np.random.seed(x + np.uint32(
+                torch.utils.data.get_worker_info().seed)))
+
+        self.optimizer, self.scheduler = model.get_optimizer(cfg)
+
+        is_resume = model.cfg.get('is_resume', True)
+        self.load_ckpt(model.cfg.ckpt_path, is_resume=is_resume)
+
+        dataset_name = dataset.name if dataset is not None else ''
+        # tensorboard_dir = join(
+        #     self.cfg.train_sum_dir,
+        #     model.__class__.__name__ + '_' + dataset_name + '_torch')
+        # runid = get_runid(tensorboard_dir)
+        # self.tensorboard_dir = join(self.cfg.train_sum_dir,
+        #                             runid + '_' + Path(tensorboard_dir).name)
+
+        # writer = SummaryWriter(self.tensorboard_dir)
+        # self.save_config(writer)
+        # log.info("Writing summary in {}.".format(self.tensorboard_dir))
+        record_summary = cfg.get('summary').get('record_for', [])
+
+        print("Started training")
+
+        
+        epoch = 1
+        print(f'=== EPOCH {epoch:d}/{cfg.max_epoch:d} ===')
+        # --------------------- training
+        # --------------------- validation
+        model.eval()
+        self.valid_losses = []
+        model.trans_point_sampler = valid_sampler.get_point_sampler()
+
+        with torch.no_grad():
+            for step, inputs in enumerate(
+                    tqdm(valid_loader, desc='validation')):
+                if hasattr(inputs['data'], 'to'):
+                    inputs['data'].to(device)
+
+                results = model(inputs['data'])
+                loss, gt_labels, predict_scores = model.get_loss(
+                    Loss, results, inputs, device)
+
+                if predict_scores.size()[-1] == 0:
+                    continue
+
+                self.metric_val.update(predict_scores, gt_labels)
+
+                self.valid_losses.append(loss.cpu().item())
+                # Save only for the first batch
+                if 'valid' in record_summary and step == 0:
+                    self.summary['valid'] = self.get_3d_summary(
+                        results, inputs['data'], epoch)
+
+        val_accs = self.metric_val.acc()
+        val_ious = self.metric_val.iou()
+        self.valid_losses
+
+        print(f"validation accuracy: {val_accs}\nvalidation IoU: {val_ious}\nvalidation loss: {np.mean(np.asarray(self.valid_losses))}")
+        print(f"validation acc: {np.mean(val_accs)}")
+        print(f"validation iou: {np.mean(val_ious)}")
+
+        return dict({
+            'val_acc': val_accs,
+            'val_iou': val_ious,
+            'val_loss': np.mean(np.asarray(self.valid_losses))
+        })
+        # self.save_logs(writer, epoch)
+
+        # if epoch % cfg.save_ckpt_freq == 0 or epoch == cfg.max_epoch:
+        #     self.save_ckpt(epoch)
 
     def get_batcher(self, device, split='training'):
         """Get the batcher to be used based on the device and split."""
