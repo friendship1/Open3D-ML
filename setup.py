@@ -16,5 +16,5 @@ if __name__ == '__main__':
         name='ml3d',
         description='An extension of Open3D for 3D machine learning tasks',
         author='yi',
-        packages=find_packages(exclude=('configs', 'tools', 'demo')),
+        packages=find_packages(exclude=('configs', 'tools', 'demo', 'segdg')),
     )
