@@ -38,7 +38,7 @@ pipeline:
   batch_size: 4
   main_log_dir: ./logs
   max_epoch: 100
-  save_ckpt_freq: 5
+  save_ckpt_freq: 1
   scheduler_gamma: 0.9886
   test_batch_size: 1
   train_sum_dir: train_log
