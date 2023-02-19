@@ -20,6 +20,13 @@ def get_hash(x: str):
     h = hashlib.md5(x.encode())
     return h.hexdigest()
 
+hash_remap = {
+    '21cae1385e5df4f7eda6f6f8ca7cc686':'19aaf3d94dcb2f5641af953308436e16', # RandLaNetNoXY -> RandLaNet
+    '386c10d76bd9abe46376ce3714937afd':'19aaf3d94dcb2f5641af953308436e16', # RandLaNetNoXYBase -> RandLaNet
+    'a26e0d3e7d15b654eb94accff07789ae':'19aaf3d94dcb2f5641af953308436e16', # RandLaNetNoXYBase2 -> RandLaNet
+    '09184da840ea6a569f1e66aee5928c98':'19aaf3d94dcb2f5641af953308436e16', # RandLaNetNoXYZ -> RandLaNet
+    '678f491374bfac84b31fb71c956750d2':'19aaf3d94dcb2f5641af953308436e16', # RandLaNetBN -> RandLaNet
+}
 
 class Cache(object):
     """Cache converter for preprocessed data."""
@@ -35,7 +42,7 @@ class Cache(object):
             class: The corresponding class.
         """
         self.func = func
-        self.cache_dir = join(cache_dir, cache_key)
+        self.cache_dir = join(cache_dir, hash_remap.get(cache_key, cache_key))
         make_dir(self.cache_dir)
         self.cached_ids = [splitext(p)[0] for p in listdir(self.cache_dir)]
 
