@@ -16,6 +16,7 @@ from .kitti import KITTI
 from .nuscenes import NuScenes
 from .nuscenessk import NuScenesSK
 from .waymosk import WaymoSK
+from .waymosk import WaymoSK as WaymoSK32
 from .semantickittisk import SemanticKITTISK
 from .waymo import Waymo
 from .lyft import Lyft
@@ -28,7 +29,7 @@ from .matterport_objects import MatterportObjects
 __all__ = [
     'SemanticKITTI', 'S3DIS', 'Toronto3D', 'ParisLille3D', 'Semantic3D',
     'Custom3D', 'utils', 'augment', 'samplers', 'KITTI', 'Waymo', 'NuScenes',
-    'NuScenesSK', 'WaymoSK', 'SemanticKITTISK',
+    'NuScenesSK', 'WaymoSK', 'SemanticKITTISK', 'WaymoSK32',
     'Lyft', 'ShapeNet', 'SemSegRandomSampler', 'InferenceDummySplit',
     'SemSegSpatiallyRegularSampler', 'Argoverse', 'Scannet', 'SunRGBD',
     'MatterportObjects'
