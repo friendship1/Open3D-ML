@@ -143,6 +143,16 @@ class Augmentation():
 
         return pc + noise
 
+    def big_noise(self, pc, cfg):
+        noise_std = cfg.get('noise_std', 100000)
+        # noise = (self.rng.uniform((-noise_std, noise_std), size=(pc.shape[0], pc.shape[1]))).astype(np.float32)
+        noise = np.float32(self.rng.uniform(-noise_std, noise_std))
+
+        pc[:, 0] += noise
+        pc[:, 1] += noise
+
+        return pc 
+
     def augment(self, data):
         raise NotImplementedError(
             "Please use one of SemsegAugmentation or ObjdetAugmentation.")
@@ -160,7 +170,7 @@ class SemsegAugmentation(Augmentation):
 
         # Raise warnings for misspelled/unimplemented methods.
         all_methods = [
-            'recenter', 'normalize', 'rotate', 'scale', 'noise',
+            'recenter', 'normalize', 'rotate', 'scale', 'noise', 'big_noise',
             'RandomDropout', 'RandomDropout2', 'RandomHorizontalFlip', 'ChromaticAutoContrast',
             'ChromaticTranslation', 'ChromaticJitter',
             'HueSaturationTranslation'
@@ -403,6 +413,9 @@ class SemsegAugmentation(Augmentation):
 
         if 'noise' in cfg:
             point = self.noise(point, cfg['noise'])
+        
+        if 'big_noise' in cfg:
+            point = self.big_noise(point, cfg['big_noise'])
 
         if 'RandomDropout' in cfg:
             point, feat, labels = self.RandomDropout(point, feat, labels,
