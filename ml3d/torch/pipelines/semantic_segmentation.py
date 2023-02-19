@@ -677,6 +677,107 @@ class SemanticSegmentation(BasePipeline):
         # if epoch % cfg.save_ckpt_freq == 0 or epoch == cfg.max_epoch:
         #     self.save_ckpt(epoch)
 
+    def run_test2(self):
+        """Run the test using the data passed."""
+        model = self.model
+        dataset = self.dataset
+        device = self.device
+        cfg = self.cfg
+        model.device = device
+        model.to(device)
+        model.eval()
+        self.metric_test = SemSegMetric()
+
+        timestamp = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+
+        log.info("DEVICE : {}".format(device))
+        log_file_path = join(cfg.logs_dir, 'log_test_' + timestamp + '.txt')
+        log.info("Logging in file : {}".format(log_file_path))
+        log.addHandler(logging.FileHandler(log_file_path))
+
+        batcher = self.get_batcher(device)
+
+        test_dataset = dataset.get_split('test')
+        test_sampler = test_dataset.sampler
+        test_split = TorchDataloader(dataset=test_dataset,
+                                     preprocess=model.preprocess,
+                                     transform=model.transform,
+                                     sampler=test_sampler,
+                                     use_cache=dataset.cfg.use_cache)
+        test_loader = DataLoader(test_split,
+                                 batch_size=cfg.test_batch_size,
+                                 sampler=get_sampler(test_sampler),
+                                 collate_fn=batcher.collate_fn)
+
+        self.dataset_split = test_dataset
+
+        self.load_ckpt(model.cfg.ckpt_path)
+
+        model.trans_point_sampler = test_sampler.get_point_sampler()
+        self.curr_cloud_id = -1
+        self.test_probs = []
+        self.test_labels = []
+        self.ori_test_probs = []
+        self.ori_test_labels = []
+
+        record_summary = cfg.get('summary').get('record_for', [])
+        log.info("Started testing")
+
+        with torch.no_grad():
+            for unused_step, inputs in enumerate(test_loader):
+                if hasattr(inputs['data'], 'to'):
+                    inputs['data'].to(device)
+                results = model(inputs['data'])
+                self.update_tests(test_sampler, inputs, results)
+
+                if self.complete_infer:
+                    inference_result = {
+                        'predict_labels': self.ori_test_labels.pop(),
+                        'predict_scores': self.ori_test_probs.pop()
+                    }
+                    attr = self.dataset_split.get_attr(test_sampler.cloud_id)
+                    gt_labels = self.dataset_split.get_data(
+                        test_sampler.cloud_id)['label']
+                    if (gt_labels > 0).any():
+                        valid_scores, valid_labels = filter_valid_label(
+                            torch.tensor(
+                                inference_result['predict_scores']).to(device),
+                            torch.tensor(gt_labels).to(device),
+                            model.cfg.num_classes, model.cfg.ignored_label_inds,
+                            device)
+
+                        self.metric_test.update(valid_scores, valid_labels)
+                        log.info(f"Accuracy : {self.metric_test.acc()}")
+                        log.info(f"IoU : {self.metric_test.iou()}")
+                        print(self.metric_test.iou(), '\n')
+                    # dataset.save_test_result(inference_result, attr)
+                    # Save only for the first batch
+                    if 'test' in record_summary and 'test' not in self.summary:
+                        self.summary['test'] = self.get_3d_summary(
+                            results, inputs['data'], 0, save_gt=False)
+        log.info(
+            f"Overall Testing Accuracy : {self.metric_test.acc()[-1]}, mIoU : {self.metric_test.iou()[-1]}"
+        )
+
+        log.info("Finished testing")
+
+        test_accs = self.metric_test.acc()
+        test_ious = self.metric_test.iou()
+
+        print(f"test accuracy: {test_accs}\ntest IoU: {test_ious}")
+        print(f"test acc: {np.mean(test_accs)}")
+        print(f"test iou: {np.mean(test_ious)}")
+
+        return dict({
+            'test_acc': test_accs,
+            'test_iou': test_ious,
+            # 'test_loss': np.mean(np.asarray(self.valid_losses))
+        })
+        # self.save_logs(writer, epoch)
+
+        # if epoch % cfg.save_ckpt_freq == 0 or epoch == cfg.max_epoch:
+        #     self.save_ckpt(epoch)
+
     def get_batcher(self, device, split='training'):
         """Get the batcher to be used based on the device and split."""
         batcher_name = getattr(self.model.cfg, 'batcher')
