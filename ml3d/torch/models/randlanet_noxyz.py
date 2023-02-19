@@ -14,8 +14,8 @@ from ...datasets.utils import DataProcessing
 from ...utils import MODEL
 
 
-class RandLANetNoXY(BaseModel):
-    """Class defining RandLANetNoXY, a Semantic Segmentation model.  Based on the
+class RandLANetNoXYZ(BaseModel):
+    """Class defining RandLANetNoXYZ, a Semantic Segmentation model.  Based on the
     architecture from the paper `RandLA-Net: Efficient Semantic Segmentation of
     Large-Scale Point Clouds <https://arxiv.org/abs/1911.11236>`__.
 
@@ -39,7 +39,7 @@ class RandLANetNoXY(BaseModel):
 
     def __init__(
             self,
-            name='RandLANetNoXY',
+            name='RandLANetNoXYZ',
             num_neighbors=16,
             num_layers=4,
             num_points=4096 * 11,
@@ -78,7 +78,7 @@ class RandLANetNoXY(BaseModel):
                                          cfg.dim_features,
                                          cfg.num_neighbors,
                                          encode_pos=True)
-        self.prepool = AttentivePooling(cfg.dim_features+1, cfg.dim_features)
+        self.prepool = AttentivePooling(cfg.dim_features, cfg.dim_features)
 
         ## Change to equivalent layer
         # self.fc0 = nn.Linear(cfg.in_channels, cfg.dim_features)
@@ -248,7 +248,7 @@ class RandLANetNoXY(BaseModel):
         return inputs
 
     def forward(self, inputs):
-        """Forward pass for RandLANetNoXY
+        """Forward pass for RandLANetNoXYZ
 
         Args:
             inputs: torch.Tensor, shape (B, N, d_in)
@@ -273,7 +273,7 @@ class RandLANetNoXY(BaseModel):
         ]
 
         # Delete xy coordinate infos in feature input (xyz)
-        feat = feat[:, :, 2:3]
+        feat = feat[:, :, 3:3]
         feat = feat.transpose(-2, -1).unsqueeze(-1)
         feat, _ = self.precoder(coords_list[0], feat, neighbor_indices_list[0]) # coords, x, neighbor_indices
         feat = self.prepool(feat)
@@ -484,7 +484,7 @@ class RandLANetNoXY(BaseModel):
         return test_probs, test_labels
 
 
-MODEL._register_module(RandLANetNoXY, 'torch')
+MODEL._register_module(RandLANetNoXYZ, 'torch')
 
 
 class SharedMLP(nn.Module):

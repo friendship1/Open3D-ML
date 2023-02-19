@@ -14,8 +14,8 @@ from ...datasets.utils import DataProcessing
 from ...utils import MODEL
 
 
-class RandLANetNoXY(BaseModel):
-    """Class defining RandLANetNoXY, a Semantic Segmentation model.  Based on the
+class RandLANetNoXYBase2(BaseModel):
+    """Class defining RandLANetNoXYBase2, a Semantic Segmentation model.  Based on the
     architecture from the paper `RandLA-Net: Efficient Semantic Segmentation of
     Large-Scale Point Clouds <https://arxiv.org/abs/1911.11236>`__.
 
@@ -39,7 +39,7 @@ class RandLANetNoXY(BaseModel):
 
     def __init__(
             self,
-            name='RandLANetNoXY',
+            name='RandLANetNoXYBase2',
             num_neighbors=16,
             num_layers=4,
             num_points=4096 * 11,
@@ -74,11 +74,11 @@ class RandLANetNoXY(BaseModel):
         self.augmenter = SemsegAugmentation(cfg.augment, seed=self.rng)
 
         # pre encode feature without xyz coordinate but with relative position and dist
-        self.precoder = LocalSpatialEncoding(4,
+        self.precoder = LocalSpatialEncoding(10,
                                          cfg.dim_features,
                                          cfg.num_neighbors,
                                          encode_pos=True)
-        self.prepool = AttentivePooling(cfg.dim_features+1, cfg.dim_features)
+        self.prepool = AttentivePooling(cfg.dim_features+3, cfg.dim_features)
 
         ## Change to equivalent layer
         # self.fc0 = nn.Linear(cfg.in_channels, cfg.dim_features)
@@ -248,7 +248,7 @@ class RandLANetNoXY(BaseModel):
         return inputs
 
     def forward(self, inputs):
-        """Forward pass for RandLANetNoXY
+        """Forward pass for RandLANetNoXYBase2
 
         Args:
             inputs: torch.Tensor, shape (B, N, d_in)
@@ -273,7 +273,7 @@ class RandLANetNoXY(BaseModel):
         ]
 
         # Delete xy coordinate infos in feature input (xyz)
-        feat = feat[:, :, 2:3]
+        feat = feat[:, :, :]
         feat = feat.transpose(-2, -1).unsqueeze(-1)
         feat, _ = self.precoder(coords_list[0], feat, neighbor_indices_list[0]) # coords, x, neighbor_indices
         feat = self.prepool(feat)
@@ -484,7 +484,7 @@ class RandLANetNoXY(BaseModel):
         return test_probs, test_labels
 
 
-MODEL._register_module(RandLANetNoXY, 'torch')
+MODEL._register_module(RandLANetNoXYBase2, 'torch')
 
 
 class SharedMLP(nn.Module):
@@ -605,13 +605,13 @@ class LocalSpatialEncoding(nn.Module):
             relative_dist = torch.sqrt(
                 torch.sum(torch.square(relative_pos), dim=1, keepdim=True))
 
-            # relative_features = torch.cat(
-            #     [relative_dist, relative_pos, extended_coords, neighbor_coords],
-            #     dim=1)
-            # Delete coordinate infos
             relative_features = torch.cat(
-                [relative_dist, relative_pos],
+                [relative_dist, relative_pos, extended_coords, neighbor_coords],
                 dim=1)
+            # Delete coordinate infos
+            # relative_features = torch.cat(
+            #     [relative_dist, relative_pos],
+            #     dim=1)
 
         else:
             if relative_features is None:
@@ -674,7 +674,7 @@ class LocalFeatureAggregation(nn.Module):
         self.num_neighbors = num_neighbors
 
         self.mlp1 = SharedMLP(d_in, d_out // 2, activation_fn=nn.LeakyReLU(0.2))
-        self.lse1 = LocalSpatialEncoding(4,
+        self.lse1 = LocalSpatialEncoding(10,
                                          d_out // 2,
                                          num_neighbors,
                                          encode_pos=True)

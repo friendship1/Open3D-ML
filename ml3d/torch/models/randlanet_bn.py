@@ -14,8 +14,8 @@ from ...datasets.utils import DataProcessing
 from ...utils import MODEL
 
 
-class RandLANetNoXY(BaseModel):
-    """Class defining RandLANetNoXY, a Semantic Segmentation model.  Based on the
+class RandLANetBN(BaseModel):
+    """Class defining RandLANetBN, a Semantic Segmentation model.  Based on the
     architecture from the paper `RandLA-Net: Efficient Semantic Segmentation of
     Large-Scale Point Clouds <https://arxiv.org/abs/1911.11236>`__.
 
@@ -39,7 +39,7 @@ class RandLANetNoXY(BaseModel):
 
     def __init__(
             self,
-            name='RandLANetNoXY',
+            name='RandLANetBN',
             num_neighbors=16,
             num_layers=4,
             num_points=4096 * 11,
@@ -73,17 +73,9 @@ class RandLANetNoXY(BaseModel):
         cfg = self.cfg
         self.augmenter = SemsegAugmentation(cfg.augment, seed=self.rng)
 
-        # pre encode feature without xyz coordinate but with relative position and dist
-        self.precoder = LocalSpatialEncoding(4,
-                                         cfg.dim_features,
-                                         cfg.num_neighbors,
-                                         encode_pos=True)
-        self.prepool = AttentivePooling(cfg.dim_features+1, cfg.dim_features)
-
-        ## Change to equivalent layer
-        # self.fc0 = nn.Linear(cfg.in_channels, cfg.dim_features)
-        # self.bn0 = nn.BatchNorm2d(cfg.dim_features, eps=1e-6, momentum=0.01)
-        # self.premlp = SharedMLP(cfg.in_channels, cfg.dim_features, activation_fn=nn.LeakyReLU(0.2), bn=True)
+        self.bn00 = nn.BatchNorm2d(cfg.in_channels, eps=1e-6, momentum=0.01)
+        self.fc0 = nn.Linear(cfg.in_channels, cfg.dim_features)
+        self.bn0 = nn.BatchNorm2d(cfg.dim_features, eps=1e-6, momentum=0.01)
 
         # Encoder
         self.encoder = []
@@ -248,7 +240,7 @@ class RandLANetNoXY(BaseModel):
         return inputs
 
     def forward(self, inputs):
-        """Forward pass for RandLANetNoXY
+        """Forward pass for RandLANetBN
 
         Args:
             inputs: torch.Tensor, shape (B, N, d_in)
@@ -272,19 +264,13 @@ class RandLANetNoXY(BaseModel):
             arr.to(self.device) for arr in inputs['interp_idx']
         ]
 
-        # Delete xy coordinate infos in feature input (xyz)
-        feat = feat[:, :, 2:3]
-        feat = feat.transpose(-2, -1).unsqueeze(-1)
-        feat, _ = self.precoder(coords_list[0], feat, neighbor_indices_list[0]) # coords, x, neighbor_indices
-        feat = self.prepool(feat)
+        feat = self.bn00(feat.transpose(-2, -1).unsqueeze(-1)).squeeze(-1).transpose(-2, -1)
+        feat = self.fc0(feat).transpose(-2, -1).unsqueeze(
+            -1)  # (B, dim_feature, N, 1)
+        feat = self.bn0(feat)  # (B, d, N, 1)
 
-        # feat = self.fc0(feat).transpose(-2, -1).unsqueeze(
-        #     -1)  # (B, dim_feature, N, 1)
-        # feat = self.bn0(feat)  # (B, d, N, 1)
-
-        # l_relu = nn.LeakyReLU(0.2)
-        # feat = l_relu(feat)
-        # feat = self.premlp(feat)
+        l_relu = nn.LeakyReLU(0.2)
+        feat = l_relu(feat)
 
         # Encoder
         encoder_feat_list = []
@@ -484,7 +470,7 @@ class RandLANetNoXY(BaseModel):
         return test_probs, test_labels
 
 
-MODEL._register_module(RandLANetNoXY, 'torch')
+MODEL._register_module(RandLANetBN, 'torch')
 
 
 class SharedMLP(nn.Module):
@@ -605,12 +591,8 @@ class LocalSpatialEncoding(nn.Module):
             relative_dist = torch.sqrt(
                 torch.sum(torch.square(relative_pos), dim=1, keepdim=True))
 
-            # relative_features = torch.cat(
-            #     [relative_dist, relative_pos, extended_coords, neighbor_coords],
-            #     dim=1)
-            # Delete coordinate infos
             relative_features = torch.cat(
-                [relative_dist, relative_pos],
+                [relative_dist, relative_pos, extended_coords, neighbor_coords],
                 dim=1)
 
         else:
@@ -674,7 +656,7 @@ class LocalFeatureAggregation(nn.Module):
         self.num_neighbors = num_neighbors
 
         self.mlp1 = SharedMLP(d_in, d_out // 2, activation_fn=nn.LeakyReLU(0.2))
-        self.lse1 = LocalSpatialEncoding(4,
+        self.lse1 = LocalSpatialEncoding(10,
                                          d_out // 2,
                                          num_neighbors,
                                          encode_pos=True)
