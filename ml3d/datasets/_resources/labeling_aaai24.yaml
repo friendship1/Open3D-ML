@@ -1,0 +1,515 @@
+learning_map:
+  0: 0     # "unlabeled"
+  1: 0     # "outlier" mapped to "unlabeled" --------------------------mapped
+  10: 1     # "car"
+  11: 2     # "bicycle"
+  13: 1     # "bus" mapped to "other-vehicle" --------------------------mapped
+  15: 2     # "motorcycle"
+  16: 1     # "on-rails" mapped to "other-vehicle" ---------------------mapped
+  18: 1     # "truck"
+  20: 1     # "other-vehicle"
+  30: 3     # "person"
+  31: 2     # "bicyclist"
+  32: 2     # "motorcyclist"
+  40: 4     # "road"
+  44: 4    # "parking"
+  48: 5    # "sidewalk"
+  49: 0    # "other-ground"
+  50: 7    # "building"
+  51: 7    # "fence"
+  52: 0     # "other-structure" mapped to "unlabeled" ------------------mapped
+  60: 4     # "lane-marking" to "road" ---------------------------------mapped
+  70: 6    # "vegetation"
+  71: 6    # "trunk"
+  72: 5    # "terrain"
+  80: 7    # "pole"
+  81: 7    # "traffic-sign"
+  99: 0     # "other-object" to "unlabeled" ----------------------------mapped
+  252: 1    # "moving-car" to "car" ------------------------------------mapped
+  253: 2    # "moving-bicyclist" to "bicyclist" ------------------------mapped
+  254: 3    # "moving-person" to "person" ------------------------------mapped
+  255: 2    # "moving-motorcyclist" to "motorcyclist" ------------------mapped
+  256: 1    # "moving-on-rails" mapped to "other-vehicle" --------------mapped
+  257: 1    # "moving-bus" mapped to "other-vehicle" -------------------mapped
+  258: 1    # "moving-truck" to "truck" --------------------------------mapped
+  259: 1    # "moving-other"-vehicle to "other-vehicle" ----------------mapped
+
+labels: 
+  0 : "unlabeled"
+  1 : "outlier"
+  10: "car"
+  11: "bicycle"
+  13: "bus"
+  15: "motorcycle"
+  16: "on-rails"
+  18: "truck"
+  20: "other-vehicle"
+  30: "person"
+  31: "bicyclist"
+  32: "motorcyclist"
+  40: "road"
+  44: "parking"
+  48: "sidewalk"
+  49: "other-ground"
+  50: "building"
+  51: "fence"
+  52: "other-structure"
+  60: "lane-marking"
+  70: "vegetation"
+  71: "trunk"
+  72: "terrain"
+  80: "pole"
+  81: "traffic-sign"
+  99: "other-object"
+  252: "moving-car"
+  253: "moving-bicyclist"
+  254: "moving-person"
+  255: "moving-motorcyclist"
+  256: "moving-on-rails"
+  257: "moving-bus"
+  258: "moving-truck"
+  259: "moving-other-vehicle"
+
+
+semantickitti_labels: 
+  0 : "unlabeled"
+  1 : "outlier"
+  10: "car"
+  11: "bicycle"
+  13: "bus"
+  15: "motorcycle"
+  16: "on-rails"
+  18: "truck"
+  20: "other-vehicle"
+  30: "person"
+  31: "bicyclist"
+  32: "motorcyclist"
+  40: "road"
+  44: "parking"
+  48: "sidewalk"
+  49: "other-ground"
+  50: "building"
+  51: "fence"
+  52: "other-structure"
+  60: "lane-marking"
+  70: "vegetation"
+  71: "trunk"
+  72: "terrain"
+  80: "pole"
+  81: "traffic-sign"
+  99: "other-object"
+  252: "moving-car"
+  253: "moving-bicyclist"
+  254: "moving-person"
+  255: "moving-motorcyclist"
+  256: "moving-on-rails"
+  257: "moving-bus"
+  258: "moving-truck"
+  259: "moving-other-vehicle"
+
+
+semantickitti_learning_map:
+  0: 0     # "unlabeled"
+  1: 0     # "outlier" mapped to "unlabeled" --------------------------mapped
+  10: 1     # "car"
+  11: 2     # "bicycle"
+  13: 1     # "bus" mapped to "other-vehicle" --------------------------mapped
+  15: 2     # "motorcycle"
+  16: 0     # "on-rails" mapped to "other-vehicle" ---------------------mapped
+  18: 1     # "truck"
+  20: 1     # "other-vehicle"
+  30: 3     # "person"
+  31: 2     # "bicyclist"
+  32: 2     # "motorcyclist"
+  40: 4     # "road"
+  44: 4    # "parking"
+  48: 5    # "sidewalk"
+  49: 5    # "other-ground"
+  50: 7    # "building"
+  51: 7    # "fence"
+  52: 0     # "other-structure" mapped to "unlabeled" ------------------mapped
+  60: 4     # "lane-marking" to "road" ---------------------------------mapped
+  70: 6    # "vegetation"
+  71: 6    # "trunk"
+  72: 5    # "terrain"
+  80: 7    # "pole"
+  81: 7    # "traffic-sign"
+  99: 0     # "other-object" to "unlabeled" ----------------------------mapped
+  252: 1    # "moving-car" to "car" ------------------------------------mapped
+  253: 2    # "moving-bicyclist" to "bicyclist" ------------------------mapped
+  254: 3    # "moving-person" to "person" ------------------------------mapped
+  255: 2    # "moving-motorcyclist" to "motorcyclist" ------------------mapped
+  256: 1    # "moving-on-rails" mapped to "other-vehicle" --------------mapped
+  257: 1    # "moving-bus" mapped to "other-vehicle" -------------------mapped
+  258: 1    # "moving-truck" to "truck" --------------------------------mapped
+  259: 1    # "moving-other"-vehicle to "other-vehicle" ----------------mapped
+
+semantickitti_learning_map_inv: # inverse of previous map
+  0: 0      # "unlabeled", and others ignored
+  1: 10     # "car"
+  2: 11     # "2-wheel"
+  3: 30     # "pedestrian"
+  4: 40     # "road"
+  5: 48     # "other-ground"
+  6: 70    # "vegetation"
+  7: 50    # "barrier"
+
+
+
+
+waymo_labels:
+  0 : "TYPE_UNDEFINED"
+  1 : "TYPE_CAR"
+  2: "TYPE_TRUCK"
+  3: "TYPE_BUS"
+  4: "TYPE_OTHER_VEHICLE"
+  5: "TYPE_MOTORCYCLIST"
+  6: "TYPE_BICYCLIST"
+  7: "TYPE_PEDESTRIAN"
+  8: "TYPE_SIGN"
+  9: "TYPE_TRAFFIC_LIGHT"
+  10: "TYPE_POLE"
+  11: "TYPE_CONSTRUCTION_CONE"
+  12: "TYPE_BICYCLE"
+  13: "TYPE_MOTORCYCLE"
+  14: "TYPE_BUILDING"
+  15: "TYPE_VEGETATION"
+  16: "TYPE_TREE_TRUNK"
+  17: "TYPE_CURB"
+  18: "TYPE_ROAD"
+  19: "TYPE_LANE_MARKER"
+  20: "TYPE_OTHER_GROUND"
+  21: "TYPE_WALKABLE"
+  22: "TYPE_SIDEWALK"
+
+waymo_learning_map:
+  0: 0
+  1: 1 #CAR
+  2: 1 #TRUCK
+  3: 1 #BUS
+  4: 1 #OTHER-VEHICLE
+  5: 2 #MOTORCYCLIST -> MOTORCYCLE
+  6: 2 #BICYCLIST -> BICYCLE
+  7: 3 #PEDESTRIAN
+  8: 7 #SIGN - > TRAFFIC SIGN
+  9: 7 #TRAFFIC LIGHT -> TRAFFIC LIGHT
+  10: 7 #POLE -> ARTIFICANT OBJECTS (BARRIER) 
+  11: 7 #CONE -> ARTIFICANT OBJECTS (BARRIER)
+  12: 2 #BICYCLE -> BICYCLE
+  13: 2 #MOTORCYCLE -> MOTORCYCLE
+  14: 7 #BUILDING -> ARTIFICANT OBJECTS (BARRIER)
+  15: 6 #VEGETATION -> VEGETATION
+  16: 6 #TREE TRUNK -> VEGETATION
+  17: 0 #연석
+  18: 4 #ROAD
+  19: 4 #ROAD
+  20: 4 #횡단보도 마크, 1227 -> road
+  21: 5 #OTHER_GROUND
+  22: 5 #SIDEWALK
+
+waymo_learning_map_inv: # inverse of previous map
+  0: 0      # "unlabeled", and others ignored
+  1: 1     # "car"
+  2: 5     # "motorcycle"
+  3: 7     # "pedestrian"
+  4: 18     # "road"
+  5: 22     # "other-ground"
+  6: 15    # "vegetation"
+  7: 14    # "artifact barrier"
+
+
+
+
+nuscenes_labels:
+  0: 'noise'
+  1: 'animal'
+  2: 'human.pedestrian.adult'
+  3: 'human.pedestrian.child'
+  4: 'human.pedestrian.construction_worker'
+  5: 'human.pedestrian.personal_mobility'
+  6: 'human.pedestrian.police_officer'
+  7: 'human.pedestrian.stroller'
+  8: 'human.pedestrian.wheelchair'
+  9: 'movable_object.barrier'
+  10: 'movable_object.debris'
+  11: 'movable_object.pushable_pullable'
+  12: 'movable_object.trafficcone'
+  13: 'static_object.bicycle_rack'
+  14: 'vehicle.bicycle'
+  15: 'vehicle.bus.bendy'
+  16: 'vehicle.bus.rigid'
+  17: 'vehicle.car'
+  18: 'vehicle.construction'
+  19: 'vehicle.emergency.ambulance'
+  20: 'vehicle.emergency.police'
+  21: 'vehicle.motorcycle'
+  22: 'vehicle.trailer'
+  23: 'vehicle.truck'
+  24: 'flat.driveable_surface'
+  25: 'flat.other'
+  26: 'flat.sidewalk'
+  27: 'flat.terrain'
+  28: 'static.manmade'
+  29: 'static.other'
+  30: 'static.vegetation'
+  31: 'vehicle.ego'
+
+nuscenes_learning_map:
+  0: 0
+  1: 0 
+  2: 3 #pedestiran
+  3: 3 #'human.pedestrian.child'
+  4: 3 #pedestiran
+  5: 2 #12/27 mobility -> cyclist
+  6: 3 #pedestiran
+  7: 3
+  8: 3
+  9: 7 #artificant barrier
+  10: 7 #12/27도로 위 쓰레기 -> atrificant barrier
+  11: 7 #12/27끌개,카트 등 -> atrificant barrier
+  12: 7 #artificant barrier
+  13: 7 #12/27 자전거 거치대 ->atrificant barrier
+  14: 2 #'vehicle.bicycle'
+  15: 1 #'vehicle.bus.bendy'
+  16: 1 #'vehicle.bus.rigid'
+  17: 1 #'vehicle.car'
+  18: 1 #'vehicle.construction'
+  19: 1 #'vehicle.emergency.ambulance'
+  20: 1 #'vehicle.emergency.police'
+  21: 2 #'vehicle.motorcycle'
+  22: 1 #'vehicle.trailer'
+  23: 1 #'vehicle.truck'
+  24: 4 #'flat.driveable_surface'
+  25: 5 #'flat.other'
+  26: 5 #'flat.sidewalk'
+  27: 5 #'flat.terrain'
+  28: 7 #'static.manmade'
+  29: 7 #12/27atrificant barrier
+  30: 6 #'static.vegetation'
+  31: 0
+
+nuscenes_learning_map_inv: # inverse of previous map
+  0: 0      # "unlabeled", and others ignored
+  1: 17     # "car"
+  2: 21     # "motorcycle"
+  3: 2     # "pedestrian"
+  4: 24     # "road"
+  5: 26     # "other-ground"
+  6: 30    # "vegetation"
+  7: 28    # "barrier"
+
+
+
+
+pandaset_labels:
+  0: 'none'
+  1: 'smoke'
+  2: 'exhaust'
+  3: 'spray or rain'
+  4: 'reflection'
+  5: 'vegetation'
+  6: 'ground'
+  7: 'road'
+  8: 'lane line marking'
+  9: 'stop line marking'
+  10: 'other road marking'
+  11: 'sidewalk'
+  12: 'driveway'
+  13: 'car'
+  14: 'pickup truck'
+  15: 'medium sized truck'
+  16: 'semi-truck'
+  17: 'towed object'
+  18: 'motorcycle'
+  19: 'other vehicle (construction)'
+  20: 'other vehicle (uncommon)'
+  21: 'other vehicle (pedicab)'
+  22: 'emergency vehicle'
+  23: 'bus'
+  24: 'personal mobility device'
+  25: 'motorized scooter'
+  26: 'bicycle'
+  27: 'train'
+  28: 'trolley'
+  29: 'tram'
+  30: 'pedestrian'
+  31: 'pedestiran with object'
+  32: 'animals-bird'
+  33: 'animals-other'
+  34: 'pylons'
+  35: 'road barriers'
+  36: 'signs'
+  37: 'cones'
+  38: 'construction signs'
+  39: 'temporary construction barriers'
+  40: 'rolling containers'
+  41: 'building'
+  42: 'other static object'
+
+pandaset_learning_map:
+  0: 0
+  1: 0 #smoke
+  2: 0 #Exhaust
+  3: 0 #Spray or rain
+  4: 0 #Reflection
+  5: 6 #Vegetation
+  6: 5 #Ground
+  7: 4 #Road
+  8: 4 #Lane Line Marking
+  9: 4 #Stop Line Marking
+  10: 4 #Other Road Marking
+  11: 5 #Sidewalk
+  12: 4 #Driveway
+  13: 1 #Car
+  14: 1 #Pickup Truck
+  15: 1 #Medium-sized Truck
+  16: 1 #Semi-truck
+  17: 1 #Towed Object
+  18: 2 #Motorcycle
+  19: 1 #Other Vehicle - Construction Vehicle
+  20: 1 #Other Vehicle - Uncommon
+  21: 1 #Other Vehicle - Pedicab
+  22: 1 #Emergency Vehicle
+  23: 1 #Bus
+  24: 2 #Personal Mobility Device
+  25: 2 #Motorized Scooter
+  26: 2 #Bicycle
+  27: 0 #Train
+  28: 0 #1227 Trolley -> none
+  29: 0 #1227 Tram / Subway -> none
+  30: 3 #Pedestrian
+  31: 3 #Pedestrian with Object
+  32: 0 #Animals - Bird
+  33: 0 #Animals - Other
+  34: 7 #Pylons
+  35: 7 #Road Barriers
+  36: 7 #Signs
+  37: 7 #Cones
+  38: 7 #Construction Signs
+  39: 7 #Temporary Construction Barriers
+  40: 7 #Rolling Containers
+  41: 7 #Building
+  42: 7 #Other Static Object
+
+pandaset_learning_map_inv: # inverse of previous map
+  0: 0      # "unlabeled", and others ignored
+  1: 13     # "car"
+  2: 18     # "motorcycle"
+  3: 30     # "pedestrian"
+  4: 7     # "road"
+  5: 11     # "other-ground"
+  6: 5    # "vegetation"
+  7: 41    # "artifact barrier"
+
+
+
+# learning_map_inv: # inverse of previous map
+#   0: 0      # "unlabeled", and others ignored
+#   1: 10     # "car"
+#   2: 11     # "bicycle"
+#   3: 15     # "motorcycle"
+#   4: 18     # "truck"
+#   5: 20     # "other-vehicle"
+#   6: 30     # "person"
+#   7: 31     # "bicyclist"
+#   8: 32     # "motorcyclist"
+#   9: 40     # "road"
+#   10: 44    # "parking"
+#   11: 48    # "sidewalk"
+#   12: 49    # "other-ground"
+#   13: 50    # "building"
+#   14: 51    # "fence"
+#   15: 70    # "vegetation"
+#   16: 71    # "trunk"
+#   17: 72    # "terrain"
+#   18: 80    # "pole"
+#   19: 81    # "traffic-sign"
+learning_ignore: # Ignore classes
+  0: True      # "unlabeled", and others ignored
+  1: False     # "car"
+  2: False     # "bicycle"
+  3: False     # "motorcycle"
+  4: False     # "truck"
+  5: False     # "other-vehicle"
+  6: False     # "person"
+  7: False     # "bicyclist"
+  8: False     # "motorcyclist"
+  9: False     # "road"
+  10: False    # "parking"
+  11: False    # "sidewalk"
+  12: False    # "other-ground"
+  13: False    # "building"
+  14: False    # "fence"
+  15: False    # "vegetation"
+  16: False    # "trunk"
+  17: False    # "terrain"
+  18: False    # "pole"
+  19: False    # "traffic-sign"
+
+
+
+
+
+
+
+
+  
+split: # sequence numbers
+  train:
+    - 3
+    - 4
+  valid:
+    - 4
+  test:
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+# split: # sequence numbers
+#   train:
+#     - 0
+#     - 1
+#     - 2
+#     - 3
+#     - 4
+#     - 5
+#     - 6
+#     - 7
+#     - 9
+#     - 10
+#   valid:
+#     - 8
+#   test:
+#     - 11
+#     - 12
+#     - 13
+#     - 14
+#     - 15
+#     - 16
+#     - 17
+#     - 18
+#     - 19
+#     - 20
+#     - 21
+
+color_map: # bgr
+  0 : [0, 0, 0]
+  1 : [245, 150, 100] #car
+  2: [180, 30, 80] #truck
+  3: [250, 80, 100] #bus
+  4: [255, 0, 0] #other-vehicle
+  5: [150, 60, 30] #motorcycle
+  6: [245, 230, 100] #bicycle
+  7: [30, 30, 255] #pedestiran
+  8: [255, 0, 255] #road
+  9: [255, 255, 255] #sidewalk
+  10: [75, 0, 175] #other-ground
+  11: [0, 175, 0] #vegetation
+  12: [0, 200, 255] #artifact barrier

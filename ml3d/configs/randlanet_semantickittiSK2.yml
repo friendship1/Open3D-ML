@@ -1,0 +1,47 @@
+dataset:
+  name: SemanticKITTISK
+  dataset_path: /data1/data/kitti_odometry/odometry/dataset # path/to/your/dataset
+  cache_dir: ./logs/cache/semantickitti64
+  class_weights: [98194550, 1602482, 569248, 432228025, 452749287, 534830612, 418482513]
+  test_result_folder: ./test
+  test_split: ['08']
+  training_split: ['00', '01', '02', '03', '04', '05', '06', '07', '09', '10']
+  all_split: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10']
+  validation_split: ['08']
+  use_cache: true
+  sampler:
+    name: 'SemSegRandomSampler'
+model:
+  name: RandLANet
+  batcher: DefaultBatcher
+  ckpt_path:  # path/to/your/checkpoint
+  num_neighbors: 16
+  num_layers: 4
+  num_points: 45056
+  num_classes: 7
+  ignored_label_inds: [0]
+  sub_sampling_ratio: [4, 4, 4, 4]
+  in_channels: 3
+  dim_features: 8
+  dim_output: [16, 64, 128, 256]
+  grid_size: 0.06
+  augment:
+    recenter:
+      dim: [0, 1]
+pipeline:
+  name: SemanticSegmentation
+  optimizer:
+    lr: 0.001
+  batch_size: 8
+  main_log_dir: ./logs/SemanticKITTISK
+  max_epoch: 100
+  save_ckpt_freq: 1
+  scheduler_gamma: 0.9886
+  test_batch_size: 1
+  train_sum_dir: ./logs/SemanticKITTISK/train_log
+  val_batch_size: 2
+  summary:
+    record_for: []
+    max_pts:
+    use_reference: false
+    max_outputs: 1

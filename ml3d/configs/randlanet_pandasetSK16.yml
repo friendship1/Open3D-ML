@@ -1,0 +1,99 @@
+dataset:
+  name: PandasetSK
+  dataset_path: /data1/data/pandaset_16_1800_kitti_format  # path/to/your/dataset
+  cache_dir: ./logs/cache/pandaset16
+  # class_weights: [2061156, 5385, 2156470, 9655, 139443, 8723, 9159, 8809, 12168, 9305106,
+  #    66861, 718641, 736239, 163126, 141351, 357463, 4247297, 38104219, 1514414, 2218,
+  #    59590, 427391, 4907511, 15841384, 316958899, 8559216, 70197461, 70289730, 178178063, 817150,
+  #    122581273, 0]
+  # class_weights: [46748248,  417793,    1706812,   223521788, 103741269, 86071073, 134517367]
+  class_weights: [61416119,  723347,    2995332,   58750869, 31747125, 68049294, 201067014]
+  
+  test_result_folder: ./test/PandasetSK
+  test_split: ['0060', '0061', '0062', '0063', '0064', '0065', '0066', '0067', '0068', '0069', '0070', '0071', '0072', '0073', '0074', '0075']
+  training_split: ['0000', '0001', '0002', '0003', '0004', '0005', '0006', '0007', '0008', '0009', '0010', '0011', '0012', '0013', '0014', '0015', '0016', '0017', '0018', '0019', '0020', '0021', '0022', '0023', '0024', '0025', '0026', '0027', '0028', '0029', '0030', '0031', '0032', '0033', '0034', '0035', '0036', '0037', '0038', '0039', '0040', '0041', '0042', '0043', '0044', '0045', '0046', '0047', '0048', '0049', '0050', '0051', '0052', '0053', '0054', '0055', '0056', '0057', '0058', '0059']
+  all_split: ['0000', '0001', '0002', '0003', '0004', '0005', '0006', '0007', '0008', '0009', '0010', '0011', '0012', '0013', '0014', '0015', '0016', '0017', '0018', '0019', '0020', '0021', '0022', '0023', '0024', '0025', '0026', '0027', '0028', '0029', '0030', '0031', '0032', '0033', '0034', '0035', '0036', '0037', '0038', '0039', '0040', '0041', '0042', '0043', '0044', '0045', '0046', '0047', '0048', '0049', '0050', '0051', '0052', '0053', '0054', '0055', '0056', '0057', '0058', '0059', '0060', '0061', '0062', '0063', '0064', '0065', '0066', '0067', '0068', '0069', '0070', '0071', '0072', '0073', '0074', '0075']
+  validation_split: ['0060', '0061', '0062', '0063', '0064', '0065', '0066', '0067', '0068', '0069', '0070', '0071', '0072', '0073', '0074', '0075']
+  use_cache: true
+  sampler:
+    name: 'SemSegRandomSampler'
+  class_map: {
+    0: 0,
+    1: 0, #smoke
+    2: 0, #Exhaust
+    3: 0, #Spray or rain
+    4: 0, #Reflection
+    5: 6, #Vegetation
+    6: 5, #Ground
+    7: 4, #Road
+    8: 4, #Lane Line Marking
+    9: 4, #Stop Line Marking
+    10: 4, #Other Road Marking
+    11: 5, #Sidewalk
+    12: 4, #Driveway
+    13: 1, #Car
+    14: 1, #Pickup Truck
+    15: 1, #Medium-sized Truck
+    16: 1, #Semi-truck
+    17: 1, #Towed Object
+    18: 2, #Motorcycle
+    19: 1, #Other Vehicle - Construction Vehicle
+    20: 1, #Other Vehicle - Uncommon
+    21: 1, #Other Vehicle - Pedicab
+    22: 1, #Emergency Vehicle
+    23: 1, #Bus
+    24: 2, #Personal Mobility Device
+    25: 2, #Motorized Scooter
+    26: 2, #Bicycle
+    27: 0, #Train
+    28: 0, #1227 Trolley -> none
+    29: 0, #1227 Tram / Subway -> none
+    30: 3, #Pedestrian
+    31: 3, #Pedestrian with Object
+    32: 0, #Animals - Bird
+    33: 0, #Animals - Other
+    34: 7, #Pylons
+    35: 7, #Road Barriers
+    36: 7, #Signs
+    37: 7, #Cones
+    38: 7, #Construction Signs
+    39: 7, #Temporary Construction Barriers
+    40: 7, #Rolling Containers
+    41: 7, #Building
+    42: 7, #Other Static Object
+  }
+model:
+  name: RandLANet
+  batcher: DefaultBatcher
+  ckpt_path:  # path/to/your/checkpoint
+  num_neighbors: 16
+  num_layers: 4
+  num_points: 45056
+  # num_classes: 19
+  num_classes: 7
+  ignored_label_inds: [0]
+  sub_sampling_ratio: [4, 4, 4, 4]
+  in_channels: 3
+  dim_features: 8
+  dim_output: [16, 64, 128, 256]
+  grid_size: 0.06
+  augment:
+    recenter:
+      dim: [0, 1]
+pipeline:
+  name: SemanticSegmentation
+  optimizer:
+    lr: 0.001
+  batch_size: 12
+  main_log_dir: ./logs/PandasetSK16
+  max_epoch: 100
+  save_ckpt_freq: 1
+  scheduler_gamma: 0.9886
+  test_batch_size: 1
+  train_sum_dir: ./logs/PandasetSK16/train_log
+  val_batch_size: 2
+  summary:
+    record_for: []
+    max_pts:
+    use_reference: false
+    max_outputs: 1
