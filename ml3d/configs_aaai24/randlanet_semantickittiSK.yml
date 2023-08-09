@@ -40,6 +40,7 @@ pipeline:
   test_batch_size: 1
   train_sum_dir: ./logs/SemanticKITTISK/train_log
   val_batch_size: 2
+  num_workers: 4
   summary:
     record_for: []
     max_pts:
